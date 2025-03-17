@@ -20,13 +20,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Launch EC2 Instance2
+      - name: Launch EC2 Instance
         run: |
           INSTANCE_ID=$(aws ec2 run-instances \
             --image-id ami-08b5b3a93ed654d19 \
             --instance-type t3.micro \
             --key-name macbook \
             --security-groups default \
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=test}]' \
             --query 'Instances[0].InstanceId' \
             --output text)
           echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
