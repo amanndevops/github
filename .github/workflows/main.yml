@@ -1,4 +1,4 @@
-name: Deploy EC2 Instance
+name: Deploy EC2 Instance and Install NGINX
 
 on:
   push:
@@ -47,3 +47,12 @@ jobs:
       - name: Verify Instance Access
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'echo "EC2 Instance is accessible!"'
+
+      - name: Install NGINX
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'sudo apt update && sudo apt install -y nginx'
+
+      - name: Verify NGINX Installation
+        run: |
+          curl http://$PUBLIC_IP
+
