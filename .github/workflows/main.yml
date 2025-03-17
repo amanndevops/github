@@ -1,4 +1,4 @@
-name: Deploy NGINX on EC2
+name: Deploy EC2 Instance
 
 on:
   push:
@@ -43,10 +43,6 @@ jobs:
             --output text)
           echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
 
-      - name: Install NGINX
+      - name: Verify Instance Access
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'sudo apt update && sudo apt install -y nginx'
-
-      - name: Verify NGINX
-        run: |
-          curl http://$PUBLIC_IP
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'echo "EC2 Instance is accessible!"'
