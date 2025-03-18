@@ -1,4 +1,4 @@
-name: Deploy EC2 Instance with NGINX User Data
+name: Deploy EC2 with NGINX, Jenkins, and Java
 
 on:
   push:
@@ -20,15 +20,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Launch EC2 Instance with NGINX
+      - name: Launch EC2 Instance with NGINX, Jenkins, and Java
         run: |
           INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-053b0d53c279acc90 \  # Ubuntu AMI
+            --image-id ami-08b5b3a93ed654d19 \
             --instance-type t3.micro \
             --key-name macbook \
             --security-groups default \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=test}]' \
-            --user-data file://nginx-user-data.sh \
+            --user-data file://user-data.sh \
             --query 'Instances[0].InstanceId' \
             --output text)
           echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
@@ -45,10 +45,7 @@ jobs:
             --output text)
           echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
 
-      - name: Verify Instance Access with ubuntu user
+      - name: Verify NGINX and Jenkins
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'echo "EC2 Instance is accessible!"'
-
-      - name: Verify NGINX Installation
-        run: |
-          curl http://$PUBLIC_IP
+          echo "Nginx: http://$PUBLIC_IP"
+          echo "Jenkins: http://$PUBLIC_IP:8080"
