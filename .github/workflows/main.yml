@@ -44,6 +44,12 @@ jobs:
             --output text)
           echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
 
+      - name: Add SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/macbook.pem
+          chmod 400 ~/.ssh/macbook.pem
+
       - name: Verify Instance Access
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'echo "EC2 Instance is accessible!"'
@@ -55,4 +61,3 @@ jobs:
       - name: Verify NGINX Installation
         run: |
           curl http://$PUBLIC_IP
-
