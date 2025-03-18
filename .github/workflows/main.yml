@@ -1,4 +1,4 @@
-name: Deploy EC2 Instance and Install NGINX
+name: Deploy EC2 Instance with NGINX User Data
 
 on:
   push:
@@ -20,14 +20,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Launch EC2 Instance
+      - name: Launch EC2 Instance with NGINX
         run: |
           INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-08b5b3a93ed654d19 \
+            --image-id ami-053b0d53c279acc90 \  # Ubuntu AMI
             --instance-type t3.micro \
             --key-name macbook \
             --security-groups default \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=test}]' \
+            --user-data file://nginx-user-data.sh \
             --query 'Instances[0].InstanceId' \
             --output text)
           echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
@@ -44,19 +45,9 @@ jobs:
             --output text)
           echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
 
-      - name: Add SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/macbook.pem
-          chmod 400 ~/.ssh/macbook.pem
-
-      - name: Verify Instance Access
+      - name: Verify Instance Access with ubuntu user
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'echo "EC2 Instance is accessible!"'
-
-      - name: Install NGINX
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/macbook.pem ubuntu@$PUBLIC_IP 'sudo apt update && sudo apt install -y nginx'
 
       - name: Verify NGINX Installation
         run: |
